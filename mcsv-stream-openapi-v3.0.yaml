@@ -1,0 +1,296 @@
+openapi: 3.0.3
+info:
+  title: MCSV Stream DN API
+  description: API de streaming de videos reactivo para MCSV Stream DN - Soporte para Range Requests y reproducción adaptive
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://github.com/DN-PORTAL/mcsv-stream-dn
+  license:
+    name: Apache 2.0
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://stream-api.example.com
+    description: Production server
+
+tags:
+  - name: Video Streaming
+    description: API para streaming de videos con soporte reactivo y Range Requests
+
+paths:
+  # ============ VIDEO STREAMING ENDPOINTS ============
+  /video/ping/{idMedia}/{dato}:
+    get:
+      tags:
+        - Video Streaming
+      summary: Health check del servicio de streaming
+      description: |
+        Verifica que el servicio de streaming esté activo y disponible.
+        También valida la configuración del directorio de videos.
+      operationId: healthCheckVideo
+      parameters:
+        - name: idMedia
+          in: path
+          required: true
+          description: ID del media para identificación
+          schema:
+            type: string
+            example: "media-123"
+        - name: dato
+          in: path
+          required: true
+          description: Dato adicional para validación
+          schema:
+            type: string
+            example: "validation-data"
+      responses:
+        '200':
+          description: Servicio activo y operativo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Estado del servicio
+                    example: "ok"
+                  service:
+                    type: string
+                    description: Nombre del servicio
+                    example: "mcsv-stream-dn"
+                  videoPath:
+                    type: string
+                    description: Ruta configurada para los videos
+                    example: "/app/video"
+                  timestamp:
+                    type: integer
+                    format: int64
+                    description: Timestamp en milisegundos
+                    example: 1621234567890
+
+  /video/{fileName}:
+    get:
+      tags:
+        - Video Streaming
+      summary: Stream de video con soporte Range Requests
+      description: |
+        Transmite el archivo de video solicitado con soporte completo para Range Requests.
+        Permite reproducción adaptive, fast-forward, rewind y reanudación de descargas.
+        
+        Características:
+        - Streaming reactivo usando Project Reactor
+        - Soporte para HTTP 206 Partial Content
+        - Gestión eficiente de memoria con DataBuffer
+        - Cache de 24 horas
+        - Tamaño de chunk: 1MB
+      operationId: streamVideo
+      parameters:
+        - name: fileName
+          in: path
+          required: true
+          description: Nombre del archivo de video (sin ruta)
+          schema:
+            type: string
+            example: "video-demo.mp4"
+        - name: Range
+          in: header
+          required: false
+          description: |
+            Header HTTP Range para descargas parciales.
+            Formato: bytes=start-end o bytes=start-
+            
+            Ejemplos:
+            - bytes=0-1023 (primeros 1024 bytes)
+            - bytes=1024- (desde byte 1024 hasta el final)
+            - bytes=1024-2047 (del byte 1024 al 2047)
+          schema:
+            type: string
+            example: "bytes=0-1048575"
+      responses:
+        '200':
+          description: |
+            Video completo transmitido exitosamente.
+            Se utiliza cuando no hay Range Request o cuando se solicita el archivo completo.
+          headers:
+            Content-Type:
+              description: Tipo de contenido del video
+              schema:
+                type: string
+                example: "video/mp4"
+            Content-Length:
+              description: Tamaño total del archivo en bytes
+              schema:
+                type: integer
+                example: 52428800
+            Accept-Ranges:
+              description: Indica que se aceptan Range Requests
+              schema:
+                type: string
+                example: "bytes"
+            Cache-Control:
+              description: Política de cache (24 horas)
+              schema:
+                type: string
+                example: "public, max-age=86400, immutable"
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+                description: Stream de video MP4
+
+        '206':
+          description: |
+            Contenido parcial transmitido exitosamente.
+            Se utiliza cuando se especifica un Range Request válido.
+          headers:
+            Content-Type:
+              description: Tipo de contenido del video
+              schema:
+                type: string
+                example: "video/mp4"
+            Content-Length:
+              description: Tamaño del rango solicitado en bytes
+              schema:
+                type: integer
+                example: 1048576
+            Content-Range:
+              description: |
+                Rango de bytes siendo servido.
+                Formato: bytes start-end/total
+              schema:
+                type: string
+                example: "bytes 0-1048575/52428800"
+            Accept-Ranges:
+              description: Indica que se aceptan Range Requests
+              schema:
+                type: string
+                example: "bytes"
+            Cache-Control:
+              description: Política de cache (24 horas)
+              schema:
+                type: string
+                example: "public, max-age=86400, immutable"
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+                description: Stream de video MP4 (rango parcial)
+
+        '404':
+          description: |
+            Archivo de video no encontrado.
+            El archivo especificado no existe en el directorio configurado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Video file not found"
+                  fileName:
+                    type: string
+                    example: "video-demo.mp4"
+
+        '416':
+          description: |
+            Rango solicitado no satisfacible.
+            El rango especificado en el header Range excede el tamaño del archivo.
+          headers:
+            Content-Range:
+              description: Rango válido disponible
+              schema:
+                type: string
+                example: "bytes */52428800"
+
+        '500':
+          description: |
+            Error interno del servidor.
+            Ocurrió un error inesperado durante el streaming del video.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error while streaming video"
+
+components:
+  schemas:
+    HealthCheckResponse:
+      type: object
+      description: Respuesta del health check del servicio
+      properties:
+        status:
+          type: string
+          description: Estado del servicio
+          enum: [ok, error]
+          example: "ok"
+        service:
+          type: string
+          description: Nombre identificador del servicio
+          example: "mcsv-stream-dn"
+        videoPath:
+          type: string
+          description: Ruta del directorio donde se almacenan los videos
+          example: "/app/video"
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp UNIX en milisegundos de la respuesta
+          example: 1621234567890
+
+    RangeRequestInfo:
+      type: object
+      description: Información sobre Range Requests soportados
+      properties:
+        acceptRanges:
+          type: string
+          description: Tipo de unidades de rango aceptadas
+          example: "bytes"
+        fileSize:
+          type: integer
+          description: Tamaño total del archivo en bytes
+          example: 52428800
+        chunkSize:
+          type: integer
+          description: Tamaño máximo de cada chunk en bytes
+          example: 1048576
+
+  examples:
+    RangeRequestExample:
+      summary: Ejemplo de Range Request
+      description: Solicitud de los primeros 5MB del video
+      value:
+        header: "Range: bytes=0-5242879"
+        description: "Descarga los primeros 5MB del video"
+
+    ResumeDownloadExample:
+      summary: Reanudar descarga
+      description: Reanudar una descarga desde el byte 10MB
+      value:
+        header: "Range: bytes=10485760-"
+        description: "Continúa la descarga desde el byte 10485760 hasta el final"
+
+securitySchemes:
+  {}
+
+x-custom:
+  repository: https://github.com/DN-PORTAL/mcsv-stream-dn
+  technologies:
+    - Spring Boot
+    - Project Reactor
+    - Reactive Streams
+    - DataBuffer
+  features:
+    - Reactive streaming
+    - HTTP Range Requests
+    - Adaptive bitrate streaming
+    - Memory efficient buffering
+    - 24-hour cache control
