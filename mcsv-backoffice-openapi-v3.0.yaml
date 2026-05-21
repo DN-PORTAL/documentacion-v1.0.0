@@ -1,0 +1,2100 @@
+openapi: 3.0.3
+info:
+  title: MCSV Backoffice API
+  description: Complete API specification for MCSV Backoffice platform
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://github.com/DN-PORTAL/mcsv-backoffice
+  license:
+    name: Apache 2.0
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Calendars
+    description: API for event calendars management
+  - name: Comments
+    description: API for comments management
+  - name: Communities
+    description: API for communities management
+  - name: Deliveries
+    description: API for deliveries management
+  - name: Deliveries Medias
+    description: API for deliveries media management
+  - name: Deliveries Principles
+    description: API for deliveries principles management
+  - name: DeveloperLevel
+    description: API for developer level management
+  - name: Event Categories
+    description: API for event category management
+  - name: Events
+    description: API for event management
+  - name: EventDetails
+    description: API for event detail management
+  - name: Event Status
+    description: API for event status management
+  - name: Leaders
+    description: API for leaders management
+  - name: Media
+    description: API for media files management
+  - name: Notices
+    description: API for notices management
+  - name: Period
+    description: API for period management
+  - name: Portal
+    description: API for portal management
+
+paths:
+  # ============ CALENDAR ENDPOINTS ============
+  /api/v1/calendars:
+    post:
+      tags:
+        - Calendars
+      summary: Create a new calendar with optional EventDetail files
+      operationId: createCalendar
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Calendar created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Calendars
+      summary: Get all calendars
+      operationId: getAllCalendars
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/calendars/{id}:
+    get:
+      tags:
+        - Calendars
+      summary: Get a calendar by its ID
+      operationId: getCalendarById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the calendar to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Calendar found
+        '404':
+          description: Calendar not found
+
+    put:
+      tags:
+        - Calendars
+      summary: Update an existing calendar
+      operationId: updateCalendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the calendar to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Calendar updated successfully
+        '404':
+          description: Calendar not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Calendars
+      summary: Delete a calendar by its ID
+      operationId: deleteCalendar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the calendar to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Calendar deleted successfully
+        '404':
+          description: Calendar not found
+
+  /api/v1/calendars/paginate:
+    post:
+      tags:
+        - Calendars
+      summary: Get a paginated list of calendars
+      operationId: getPaginatedCalendars
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/calendars/media/{mediaId}/status:
+    get:
+      tags:
+        - Calendars
+      summary: Get video processing status for a media file
+      operationId: getMediaProcessingStatus
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          description: ID of the media file
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success
+
+  /api/v1/calendars/media/{mediaId}:
+    delete:
+      tags:
+        - Calendars
+      summary: Delete a media file from a calendar event
+      operationId: deleteCalendarMedia
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          description: ID of the media file to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Media deleted successfully
+        '404':
+          description: Media not found
+
+  /api/v1/calendars/by-event/{eventId}:
+    get:
+      tags:
+        - Calendars
+      summary: Get calendars by event ID
+      operationId: getCalendarsByEventId
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: ID of the event
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/calendars/by-period:
+    get:
+      tags:
+        - Calendars
+      summary: Get calendars by period (month and year)
+      operationId: getCalendarsByPeriod
+      parameters:
+        - name: month
+          in: query
+          required: true
+          description: Month of the period
+          schema:
+            type: integer
+        - name: year
+          in: query
+          required: true
+          description: Year of the period
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ COMMENT ENDPOINTS ============
+  /api/v1/comments:
+    post:
+      tags:
+        - Comments
+      summary: Create a new comment
+      operationId: createComment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Comment created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Comments
+      summary: Get all comments
+      operationId: getAllComments
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/comments/{id}:
+    get:
+      tags:
+        - Comments
+      summary: Get a comment by its ID
+      operationId: getCommentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the comment to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Comment found
+        '404':
+          description: Comment not found
+
+    put:
+      tags:
+        - Comments
+      summary: Update an existing comment
+      operationId: updateComment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the comment to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Comment updated successfully
+        '404':
+          description: Comment not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Comments
+      summary: Delete a comment by its ID
+      operationId: deleteComment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the comment to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Comment deleted successfully
+        '404':
+          description: Comment not found
+
+  /api/v1/comments/paginate:
+    post:
+      tags:
+        - Comments
+      summary: Get a paginated list of comments
+      operationId: getPaginatedComments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/comments/by-notice/{noticeId}:
+    get:
+      tags:
+        - Comments
+      summary: Get comments by notice ID
+      operationId: getCommentsByNoticeId
+      parameters:
+        - name: noticeId
+          in: path
+          required: true
+          description: ID of the notice
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ COMMUNITY ENDPOINTS ============
+  /api/v1/communities:
+    post:
+      tags:
+        - Communities
+      summary: Create a new community
+      operationId: createCommunity
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Community created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Communities
+      summary: Get all communities
+      operationId: getAllCommunities
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/communities/{id}:
+    get:
+      tags:
+        - Communities
+      summary: Get a community by its ID
+      operationId: getCommunityById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the community to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Community found
+        '404':
+          description: Community not found
+
+    put:
+      tags:
+        - Communities
+      summary: Update an existing community
+      operationId: updateCommunity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the community to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Community updated successfully
+        '404':
+          description: Community not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Communities
+      summary: Delete a community by its ID
+      operationId: deleteCommunity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the community to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Community deleted successfully
+        '404':
+          description: Community not found
+
+  /api/v1/communities/paginate:
+    post:
+      tags:
+        - Communities
+      summary: Get a paginated list of communities
+      operationId: getPaginatedCommunities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/communities/by-leader/{leaderId}:
+    get:
+      tags:
+        - Communities
+      summary: Get communities by leader ID
+      operationId: getCommunitiesByLeaderId
+      parameters:
+        - name: leaderId
+          in: path
+          required: true
+          description: ID of the leader
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/communities/by-name/{name}:
+    get:
+      tags:
+        - Communities
+      summary: Find community by name
+      operationId: getCommunityByName
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Name of the community
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Community found
+        '404':
+          description: Community not found
+
+  /api/v1/communities/search:
+    get:
+      tags:
+        - Communities
+      summary: Search communities by name containing
+      operationId: searchCommunitiesByName
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Name or part of name to search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/communities/{id}/detailed:
+    get:
+      tags:
+        - Communities
+      summary: Get detailed community information by ID
+      operationId: getDetailedCommunityById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the community to retrieve with detailed information
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Community found
+        '404':
+          description: Community not found
+
+  # ============ DELIVERY ENDPOINTS ============
+  /api/v1/deliveries:
+    post:
+      tags:
+        - Deliveries
+      summary: Create a new delivery
+      operationId: createDelivery
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Delivery created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Deliveries
+      summary: Get all deliveries
+      operationId: getAllDeliveries
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/deliveries/{id}:
+    get:
+      tags:
+        - Deliveries
+      summary: Get a delivery by its ID
+      operationId: getDeliveryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Delivery found
+        '404':
+          description: Delivery not found
+
+    put:
+      tags:
+        - Deliveries
+      summary: Update an existing delivery
+      operationId: updateDelivery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Delivery updated successfully
+        '404':
+          description: Delivery not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Deliveries
+      summary: Delete a delivery by its ID
+      operationId: deleteDelivery
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Delivery deleted successfully
+        '404':
+          description: Delivery not found
+
+  /api/v1/deliveries/paginate:
+    post:
+      tags:
+        - Deliveries
+      summary: Get a paginated list of deliveries
+      operationId: getPaginatedDeliveries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/deliveries/by-title/{title}:
+    get:
+      tags:
+        - Deliveries
+      summary: Get deliveries by title
+      operationId: getDeliveriesByTitle
+      parameters:
+        - name: title
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ DELIVERY MEDIA ENDPOINTS ============
+  /api/v1/deliveries-medias/{id}:
+    delete:
+      tags:
+        - Deliveries Medias
+      summary: Delete a delivery media by its ID
+      operationId: deleteDeliveryMedia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Delivery Media deleted successfully
+        '404':
+          description: Delivery Media not found
+
+  # ============ DELIVERY PRINCIPLE ENDPOINTS ============
+  /api/v1/deliveries-principles/{id}:
+    delete:
+      tags:
+        - Deliveries Principles
+      summary: Delete a delivery principle by its ID
+      operationId: deletePrinciple
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Delivery Principle deleted successfully
+        '404':
+          description: Delivery Principle not found
+
+  # ============ DEVELOPER LEVEL ENDPOINTS ============
+  /api/v1/developer-level:
+    post:
+      tags:
+        - DeveloperLevel
+      summary: Create a new developer level
+      operationId: createDeveloperLevel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Developer level created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - DeveloperLevel
+      summary: Get all active developer levels
+      operationId: getAllActiveDeveloperLevels
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/developer-level/{id}:
+    get:
+      tags:
+        - DeveloperLevel
+      summary: Get a developer level by its ID
+      operationId: getDeveloperLevelById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Found the developer level
+        '404':
+          description: Developer level not found
+
+    put:
+      tags:
+        - DeveloperLevel
+      summary: Update an existing developer level
+      operationId: updateDeveloperLevel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Developer level updated successfully
+        '404':
+          description: Developer level not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - DeveloperLevel
+      summary: Delete a developer level by its ID
+      operationId: deleteDeveloperLevel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Developer level deleted successfully
+        '404':
+          description: Developer level not found
+
+  /api/v1/developer-level/paginate:
+    post:
+      tags:
+        - DeveloperLevel
+      summary: Get a paginated list of developer levels
+      operationId: getPaginatedDeveloperLevels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ EVENT CATEGORY ENDPOINTS ============
+  /api/v1/event-categories:
+    post:
+      tags:
+        - Event Categories
+      summary: Create a new event category
+      operationId: createEventCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Event category created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Event Categories
+      summary: Get all event categories
+      operationId: getAllEventCategories
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/event-categories/{id}:
+    get:
+      tags:
+        - Event Categories
+      summary: Get an event category by its ID
+      operationId: getEventCategoryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event category to be obtained
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Found the event category
+        '404':
+          description: Event category not found
+
+    put:
+      tags:
+        - Event Categories
+      summary: Update an existing event category
+      operationId: updateEventCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event category to be updated
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Event category updated successfully
+        '404':
+          description: Event category not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Event Categories
+      summary: Delete an event category by its ID
+      operationId: deleteEventCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event category to be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Event category deleted successfully
+        '404':
+          description: Event category not found
+
+  /api/v1/event-categories/paginate:
+    post:
+      tags:
+        - Event Categories
+      summary: Get a paginated list of event categories
+      operationId: getPaginatedEventCategories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ EVENT ENDPOINTS ============
+  /api/v1/events:
+    post:
+      tags:
+        - Events
+      summary: Create a new event
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Event created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Events
+      summary: Get all events that are not in active calendars
+      operationId: getAllEvents
+      responses:
+        '200':
+          description: Successfully retrieved list of available events
+
+  /api/v1/events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Get an event by its ID
+      operationId: getEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event to be obtained
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Found the event
+        '404':
+          description: Event not found
+
+    put:
+      tags:
+        - Events
+      summary: Update an existing event
+      operationId: updateEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event to be updated
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Event updated successfully
+        '404':
+          description: Event not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Events
+      summary: Delete an event by its ID
+      operationId: deleteEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event to be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Event deleted successfully
+        '404':
+          description: Event not found
+
+  /api/v1/events/paginate:
+    post:
+      tags:
+        - Events
+      summary: Get a paginated list of events
+      operationId: getPaginatedEvents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/events/all:
+    get:
+      tags:
+        - Events
+      summary: Get all events including those in calendars
+      operationId: getAllEventsIncludingCalendared
+      responses:
+        '200':
+          description: Successfully retrieved complete list of events
+
+  # ============ EVENT DETAIL ENDPOINTS ============
+  /api/v1/event-details:
+    post:
+      tags:
+        - EventDetails
+      summary: Create a new event detail
+      operationId: createEventDetail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: EventDetail created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - EventDetails
+      summary: Get all event details
+      operationId: getAllEventDetails
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/event-details/{id}:
+    get:
+      tags:
+        - EventDetails
+      summary: Get an event detail by its ID
+      operationId: getEventDetailById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event detail to be obtained
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Found the event detail
+        '404':
+          description: EventDetail not found
+
+    put:
+      tags:
+        - EventDetails
+      summary: Update an existing event detail
+      operationId: updateEventDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event detail to be updated
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: EventDetail updated successfully
+        '404':
+          description: EventDetail not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - EventDetails
+      summary: Delete an event detail by its ID
+      operationId: deleteEventDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event detail to be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: EventDetail deleted successfully
+        '404':
+          description: EventDetail not found
+
+  /api/v1/event-details/paginate:
+    post:
+      tags:
+        - EventDetails
+      summary: Get a paginated list of event details
+      operationId: getPaginatedEventDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ EVENT STATUS ENDPOINTS ============
+  /api/v1/event-status:
+    post:
+      tags:
+        - Event Status
+      summary: Create a new event status
+      operationId: createEventStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Event status created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Event Status
+      summary: Get all event statuses
+      operationId: getAllEventStatuses
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/event-status/{id}:
+    get:
+      tags:
+        - Event Status
+      summary: Get an event status by its ID
+      operationId: getEventStatusById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event status to be obtained
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Found the event status
+        '404':
+          description: Event status not found
+
+    put:
+      tags:
+        - Event Status
+      summary: Update an existing event status
+      operationId: updateEventStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event status to be updated
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Event status updated successfully
+        '404':
+          description: Event status not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Event Status
+      summary: Delete an event status by its ID
+      operationId: deleteEventStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event status to be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Event status deleted successfully
+        '404':
+          description: Event status not found
+
+  /api/v1/event-status/paginate:
+    post:
+      tags:
+        - Event Status
+      summary: Get a paginated list of event statuses
+      operationId: getPaginatedEventStatuses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ LEADER ENDPOINTS ============
+  /api/v1/leaders:
+    post:
+      tags:
+        - Leaders
+      summary: Create a new leader
+      operationId: createLeader
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Leader created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Leaders
+      summary: Get all leaders
+      operationId: getAllLeaders
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/leaders/{id}:
+    get:
+      tags:
+        - Leaders
+      summary: Get a leader by its ID
+      operationId: getLeaderById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the leader to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Leader found
+        '404':
+          description: Leader not found
+
+    put:
+      tags:
+        - Leaders
+      summary: Update an existing leader
+      operationId: updateLeader
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the leader to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Leader updated successfully
+        '404':
+          description: Leader not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Leaders
+      summary: Delete a leader by its ID
+      operationId: deleteLeader
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the leader to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Leader deleted successfully
+        '404':
+          description: Leader not found
+
+  /api/v1/leaders/paginate:
+    post:
+      tags:
+        - Leaders
+      summary: Get a paginated list of leaders
+      operationId: getPaginatedLeaders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/leaders/search:
+    get:
+      tags:
+        - Leaders
+      summary: Search leaders by name
+      operationId: searchLeadersByName
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Name or part of name to search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/leaders/active-at:
+    get:
+      tags:
+        - Leaders
+      summary: Get active leaders at a specific date
+      operationId: getActiveLeadersAtDate
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date to check for active leaders (format yyyy-MM-dd)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ MEDIA ENDPOINTS ============
+  /api/v1/media:
+    post:
+      tags:
+        - Media
+      summary: Create a new media file
+      operationId: createMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Media file created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Media
+      summary: Get all media files
+      operationId: getAllMedia
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/media/{id}:
+    get:
+      tags:
+        - Media
+      summary: Get a media file by its ID
+      operationId: getMediaById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the media file to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Media file found
+        '404':
+          description: Media file not found
+
+    put:
+      tags:
+        - Media
+      summary: Update an existing media file
+      operationId: updateMedia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the media file to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Media file updated successfully
+        '404':
+          description: Media file not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Media
+      summary: Delete a media file by its ID
+      operationId: deleteMedia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the media file to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Media file deleted successfully
+        '404':
+          description: Media file not found
+
+  /api/v1/media/paginate:
+    post:
+      tags:
+        - Media
+      summary: Get a paginated list of media files
+      operationId: getPaginatedMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/media/by-type/{type}:
+    get:
+      tags:
+        - Media
+      summary: Get media files by type
+      operationId: getMediaByType
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: Type of media file to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/media/image/{id}:
+    get:
+      tags:
+        - Media
+      summary: Get media image by ID
+      operationId: getMediaImage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the media file to retrieve
+          schema:
+            type: integer
+            format: int64
+        - name: v
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved image
+        '404':
+          description: Image not found
+        '500':
+          description: Internal server error
+
+  # ============ NOTICE ENDPOINTS ============
+  /api/v1/notices:
+    post:
+      tags:
+        - Notices
+      summary: Create a new notice
+      operationId: createNotice
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Notice created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Notices
+      summary: Get all notices
+      operationId: getAllNotices
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/notices/{id}:
+    get:
+      tags:
+        - Notices
+      summary: Get a notice by its ID
+      operationId: getNoticeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the notice to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Notice found
+        '404':
+          description: Notice not found
+
+    put:
+      tags:
+        - Notices
+      summary: Update an existing notice
+      operationId: updateNotice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the notice to update
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Notice updated successfully
+        '404':
+          description: Notice not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Notices
+      summary: Delete a notice by its ID
+      operationId: deleteNotice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the notice to delete
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Notice deleted successfully
+        '404':
+          description: Notice not found
+
+  /api/v1/notices/paginate:
+    post:
+      tags:
+        - Notices
+      summary: Get a paginated list of notices
+      operationId: getPaginatedNotices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/notices/{id}/view:
+    get:
+      tags:
+        - Notices
+      summary: Get a notice by its ID and increment view counter
+      operationId: getNoticeByIdAndIncrementViews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the notice to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Notice found
+        '404':
+          description: Notice not found
+
+  /api/v1/notices/by-community/{communityId}:
+    get:
+      tags:
+        - Notices
+      summary: Get notices by community ID
+      operationId: getNoticesByCommunityId
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          description: ID of the community
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/notices/search:
+    get:
+      tags:
+        - Notices
+      summary: Search notices by title containing
+      operationId: searchNoticesByTitle
+      parameters:
+        - name: title
+          in: query
+          required: true
+          description: Title or part of title to search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ PERIOD ENDPOINTS ============
+  /api/v1/period:
+    post:
+      tags:
+        - Period
+      summary: Create a new period
+      operationId: createPeriod
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Period created successfully
+        '400':
+          description: Invalid input
+
+    get:
+      tags:
+        - Period
+      summary: Get all periods
+      operationId: getAllPeriods
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/period/{id}:
+    get:
+      tags:
+        - Period
+      summary: Get a period by its ID
+      operationId: getPeriodById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the period to be obtained
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Found the period
+        '404':
+          description: Period not found
+
+    put:
+      tags:
+        - Period
+      summary: Update an existing period
+      operationId: updatePeriod
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the period to be updated
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Period updated successfully
+        '404':
+          description: Period not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Period
+      summary: Delete a period by its ID
+      operationId: deletePeriod
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the period to be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Period deleted successfully
+        '404':
+          description: Period not found
+
+  /api/v1/period/paginate:
+    post:
+      tags:
+        - Period
+      summary: Get a paginated list of periods
+      operationId: getPaginatedPeriods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationModel'
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  # ============ PORTAL ENDPOINTS ============
+  /api/v1/portal/{idDelivery}:
+    get:
+      tags:
+        - Portal
+      summary: Get a Delivery detail by its ID
+      operationId: getDeliveryDetail
+      parameters:
+        - name: idDelivery
+          in: path
+          required: true
+          description: ID of delivery
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Delivery detail found
+        '404':
+          description: Delivery detail not found
+
+  /api/v1/portal/unit/{idDelivery}:
+    get:
+      tags:
+        - Portal
+      summary: Get Unit information by delivery ID
+      operationId: getUnitInfo
+      parameters:
+        - name: idDelivery
+          in: path
+          required: true
+          description: ID of delivery
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Unit information found
+        '404':
+          description: Delivery not found
+
+  /api/v1/portal/community/{idCommunity}:
+    get:
+      tags:
+        - Portal
+      summary: Get Community detail with specific information
+      operationId: getCommunityDetail
+      parameters:
+        - name: idCommunity
+          in: path
+          required: true
+          description: ID of community
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Community detail found
+        '404':
+          description: Community not found
+
+  /api/v1/portal/community/active/by-delivery/{deliveryId}:
+    get:
+      tags:
+        - Portal
+      summary: Get active communities by delivery ID
+      operationId: getActiveCommunitiesByDeliveryId
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          description: ID of the delivery
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved list
+
+  /api/v1/portal/community/{communityId}/event-categories:
+    get:
+      tags:
+        - Portal
+      summary: Get event categories that have active events in a community
+      operationId: getEventCategoriesByCommunity
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          description: ID of the community
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Categories found
+
+  /api/v1/portal/community/{communityId}/events:
+    get:
+      tags:
+        - Portal
+      summary: Get active events by community
+      operationId: getEventsByCommunity
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          description: ID of the community
+          schema:
+            type: integer
+            format: int64
+        - name: categoryId
+          in: query
+          required: false
+          description: Optional category ID to filter events
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Events found
+        '404':
+          description: Community not found
+
+  /api/v1/portal/community/{communityId}/section-communities:
+    get:
+      tags:
+        - Portal
+      summary: Get section communities that have active events
+      operationId: getSectionCommunitiesByCommunity
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          description: ID of the community
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Section communities found
+
+  /api/v1/portal/section-community/{sectionCommunityId}/event-categories:
+    get:
+      tags:
+        - Portal
+      summary: Get event categories linked to a section community
+      operationId: getEventCategoriesBySectionCommunity
+      parameters:
+        - name: sectionCommunityId
+          in: path
+          required: true
+          description: ID of the section community
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Categories found
+
+  /api/v1/portal/{deliveryId}/events:
+    get:
+      tags:
+        - Portal
+      summary: Get active events by delivery
+      operationId: getEventsByDelivery
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          description: ID of the delivery
+          schema:
+            type: integer
+            format: int64
+        - name: categoryId
+          in: query
+          required: false
+          description: Optional category ID to filter events
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Events found
+
+  /api/v1/portal/notice/{noticeId}:
+    get:
+      tags:
+        - Portal
+      summary: Get full notice detail including markdown content
+      operationId: getNoticeDetail
+      parameters:
+        - name: noticeId
+          in: path
+          required: true
+          description: ID of the notice
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Notice detail found
+        '404':
+          description: Notice not found
+
+  /api/v1/portal/{deliveryId}/calendars:
+    get:
+      tags:
+        - Portal
+      summary: Get calendar events by delivery
+      operationId: getCalendarsByDelivery
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          description: ID of the delivery
+          schema:
+            type: integer
+            format: int64
+        - name: month
+          in: query
+          required: false
+          description: Month to filter (1-12)
+          schema:
+            type: integer
+        - name: year
+          in: query
+          required: false
+          description: Year to filter
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calendar events found
+
+components:
+  schemas:
+    PaginationModel:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Page number (0-indexed)
+        size:
+          type: integer
+          description: Page size
+        sortBy:
+          type: string
+          description: Field to sort by
+        sortDirection:
+          type: string
+          enum: [ASC, DESC]
+          description: Sort direction
